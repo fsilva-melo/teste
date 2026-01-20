@@ -233,13 +233,14 @@
     }
 
     #gameArea {
-      position: relative;
+      position: fixed;
+      top: 0;
+      left: 0;
       width: 100vw;
       height: 100vh;
       margin: 0;
-      border-radius: 0;
       overflow: hidden;
-      box-shadow: none;
+      z-index: 10;
     }
 
     /* Estilos do fundo aquático */
@@ -436,6 +437,22 @@
       align-items: center;
       text-align: center;
     }
+
+    /* === TELA DE GAME OVER CENTRALIZADA === */
+  #gameOver {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(255, 255, 255, 0.95);
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  z-index: 110;
+  text-align: center;
+  min-width: 300px;
+  max-width: 90%;
+}
 
     /* Modal da Enciclopédia */
 .modal {
@@ -1228,7 +1245,48 @@ if (isMobile()) {
 
       moveFoodsId = requestAnimationFrame(moveFoods);
     }
+    // === REDIMENSIONAMENTO DINÂMICO PARA MOBILE ===
+    function resizeGameArea() {
+      const gameArea = document.getElementById('gameArea');
+      if (!gameArea) return;
+
+      // Usa visualViewport se disponível (mobile moderno)
+      const width = window.visualViewport ? window.visualViewport.width : window.innerWidth;
+      const height = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+
+      // Ajusta tamanho do canvas lógico mantendo proporção 16:9 (ou sua preferência)
+      const aspectRatio = 16 / 9;
+      let logicalWidth, logicalHeight;
+
+      if (width / height > aspectRatio) {
+        logicalHeight = height;
+        logicalWidth = height * aspectRatio;
+      } else {
+        logicalWidth = width;
+        logicalHeight = width / aspectRatio;
+      }
+
+      // Atualiza o estilo visual (CSS)
+      gameArea.style.width = width + 'px';
+      gameArea.style.height = height + 'px';
+
+      // Opcional: atualizar dimensões internas do jogo (se usar canvas ou sistema de coordenadas fixas)
+      // Aqui você pode notificar o motor do jogo sobre nova resolução
+      // Ex: gameWorld.resize(logicalWidth, logicalHeight);
+    }
+
+    // Escuta mudanças de viewport (rotação, zoom, teclado, etc.)
+    window.addEventListener('resize', resizeGameArea);
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', resizeGameArea);
+    }
+
+    // Executa na inicialização
+    resizeGameArea();
+
     function initPhase() {
+      resizeGameArea();
+      
       // Sincroniza currentChain com currentMode (se o botão estiver ativo)
       if (typeof currentMode !== 'undefined') {
         currentChain = currentMode === 'aquatic' ? 2 : 1;
@@ -1267,12 +1325,16 @@ if (isMobile()) {
       let playerSize = 50; // padrão
 
       // Ajuste de tamanho harmonioso (caçador é o maior)
-      if (playerSprite === 'sapo') playerSize = 90;
-      else if (playerSprite === 'cobra') playerSize = 130;
-      else if (playerSprite === 'gaviao') playerSize = 130;
+      if (playerSprite === 'sapo') playerSize = 110;
+      else if (playerSprite === 'cobra') playerSize = 120;
+      else if (playerSprite === 'gaviao') playerSize = 140;
       else if (playerSprite === 'cacador') playerSize = 160;
-      else if (playerSprite === 'foca') playerSize = 110;
-      else if (playerSprite === 'tubarao') playerSize = 140;
+      else if (playerSprite === 'foca') playerSize = 140;
+      else if (playerSprite === 'tubarao') playerSize = 170;
+      else if (playerSprite === 'planta') playerSize = 100;   
+      else if (playerSprite === 'lagarta') playerSize = 90;
+      else if (playerSprite === 'fitoplancton') playerSize = 70;
+      else if (playerSprite === 'zooplancton') playerSize = 75;  
 
       playerEl.style.width = playerSize + 'px';
       playerEl.style.height = playerSize + 'px';
@@ -1291,12 +1353,13 @@ if (isMobile()) {
         const predatorSprite = getSpriteName(phase.predatorEmoji);
         let predatorSize = 50;
 
-        if (predatorSprite === 'sapo') predatorSize = 90;
-        else if (predatorSprite === 'cobra') predatorSize = 130;
-        else if (predatorSprite === 'gaviao') predatorSize = 130;
+        if (predatorSprite === 'sapo') predatorSize = 110;
+        else if (predatorSprite === 'cobra') predatorSize = 120;
+        else if (predatorSprite === 'gaviao') predatorSize = 140;
         else if (predatorSprite === 'cacador') predatorSize = 160;
-        else if (predatorSprite === 'foca') predatorSize = 110;
-        else if (predatorSprite === 'tubarao') predatorSize = 140;
+        else if (predatorSprite === 'foca') predatorSize = 140;
+        else if (predatorSprite === 'tubarao') predatorSize = 170;
+        else if (predatorSprite === 'zooplancton') predatorSize = 75;
 
         predatorEl.style.width = predatorSize + 'px';
         predatorEl.style.height = predatorSize + 'px';
@@ -1316,7 +1379,22 @@ if (isMobile()) {
       for (let i = 0; i < phase.foodCount; i++) {
         const food = document.createElement('div');
         food.className = 'entity';
-        food.innerHTML = `<img src="assets/${getSpriteName(phase.foodEmoji)}.png" style="width:100%;height:100%;object-fit:contain;">`;
+        const foodSprite = getSpriteName(phase.foodEmoji);
+        let foodSize = 50; // padrão
+
+        // Ajuste de tamanho para comidas específicas
+        if (foodSprite === 'planta') foodSize = 100;
+        else if (foodSprite === 'lagarta') foodSize = 80;
+        else if (foodSprite === 'sapo') foodSize = 110;
+        else if (foodSprite === 'cobra') foodSize = 120;        
+        else if (foodSprite === 'foca') foodSize = 140;         
+        else if (foodSprite === 'fitoplancton') foodSize = 70;  
+        else if (foodSprite === 'zooplancton') foodSize = 75;  
+        else if (foodSprite === 'gaviao') foodSize = 140; 
+
+        food.style.width = foodSize + 'px';
+        food.style.height = foodSize + 'px';
+        food.innerHTML = `<img src="assets/${foodSprite}.png" style="width:100%;height:100%;object-fit:contain;">`;
         gameArea.appendChild(food);
         foodEls.push(food);
         foods.push({ ...randomPosition(), collected: false });
@@ -1472,7 +1550,7 @@ if (isMobile()) {
   let touchStartX = 0, touchStartY = 0;
 
   function handlePlayerInput(dx, dy) {
-	    if (gameOver || winPhase) return;
+    if (gameOver || winPhase) return;
 	    const phase = getCurrentPhaseData();
 	    const speed = phase.playerSpeed;
 	    const rect = gameArea.getBoundingClientRect();
@@ -1491,46 +1569,60 @@ if (isMobile()) {
 		   checkCollisions();
 		   updateDisplay();
 	    }
+   }
+
+  // Teclado (só ativo no desktop)
+  if (isDesktop()) {
+	  document.addEventListener('keydown', (e) => {
+	    let dx = 0, dy = 0;
+		  if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') dy = -1;
+		  if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') dy = 1;
+		  if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') dx = -1;
+		  if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') dx = 1;
+		  handlePlayerInput(dx, dy);
+	  });
   }
+  
+  // === CONTROLE POR TOQUE MOBILE (SENSIBILIDADE IGUAL AO DESKTOP) ===
+  if (isMobile()) {
+    let direction = { dx: 0, dy: 0 };
+    let isTouching = false;
 
-// Teclado (só ativo no desktop)
-if (isDesktop()) {
-	document.addEventListener('keydown', (e) => {
-		let dx = 0, dy = 0;
-		if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') dy = -1;
-		if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') dy = 1;
-		if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') dx = -1;
-		if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') dx = 1;
-		handlePlayerInput(dx, dy);
-	});
-}
+    gameArea.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    const rect = gameArea.getBoundingClientRect();
+    const touchX = e.touches[0].clientX - rect.left;
+    const touchY = e.touches[0].clientY - rect.top;
 
-// Toque (só ativo no mobile)
-if (isMobile()) {
-	gameArea.addEventListener('touchstart', (e) => {
-		e.preventDefault();
-		touchStartX = e.touches[0].clientX;
-		touchStartY = e.touches[0].clientY;
-	}, { passive: false });
+    // Calcula direção relativa ao jogador
+    const dx = touchX - player.x;
+    const dy = touchY - player.y;
 
-	gameArea.addEventListener('touchmove', (e) => {
-		e.preventDefault();
-		const touchX = e.touches[0].clientX;
-		const touchY = e.touches[0].clientY;
-		const dx = touchX - touchStartX;
-		const dy = touchY - touchStartY;
+    // Define direção predominante (horizontal ou vertical)
+    if (Math.abs(dx) > Math.abs(dy)) {
+      direction.dx = dx > 0 ? 1 : -1;
+      direction.dy = 0;
+    } else {
+      direction.dx = 0;
+      direction.dy = dy > 0 ? 1 : -1;
+    }
+    isTouching = true;
+  }, { passive: false });
 
-		let inputDx = 0, inputDy = 0;
-		if (Math.abs(dx) > Math.abs(dy)) {
-			inputDx = dx > 0 ? 1 : -1;
-		} else {
-			inputDy = dy > 0 ? 1 : -1;
-		}
+  gameArea.addEventListener('touchend', () => {
+    direction.dx = 0;
+    direction.dy = 0;
+    isTouching = false;
+  }, { passive: false });
 
-		handlePlayerInput(inputDx, inputDy);
-		touchStartX = touchX;
-		touchStartY = touchY;
-	}, { passive: false });
+  // Usa o mesmo sistema de input do desktop
+  function mobileInputLoop() {
+    if (isTouching && !gameOver && !winPhase) {
+      handlePlayerInput(direction.dx, direction.dy);
+    }
+    requestAnimationFrame(mobileInputLoop);
+  }
+  mobileInputLoop();
 }
 
     function movePredator() {
@@ -1682,6 +1774,9 @@ if (isMobile()) {
         startScreen.style.display = 'none';
         document.getElementById('startScreenBackground').classList.add('hidden');
         document.getElementById('gameTitle').style.display = 'none';
+        
+        resizeGameArea();
+
         currentChain = 1;
         currentPhase = 0;
         vidas = VIDAS_INICIAIS;
