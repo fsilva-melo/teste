@@ -1,0 +1,2404 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cadeia Viva: Evolução na Natureza</title>
+  <link rel="icon" href="data:,">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background: transparent; /* ← Fundo vem da capa, não do body */
+      font-family: 'Segoe UI', sans-serif;
+      text-align: center;
+      color: #1b5e20;
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    #encyclopediaButton {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      cursor: pointer;
+      z-index: 200;
+      width: auto;
+      height: auto;
+    }
+
+    #encyclopediaButton img {
+      display: block;
+      width: 60px;       /* ← tamanho reduzido */
+      height: auto;
+      /* sem sombra, sem borda, sem fundo */
+    }
+
+    #configButton {
+      display: none;
+      pointer-events: none;
+      position: absolute;
+      top: 15px;
+      right: 70px;
+      width: 50px;
+      height: auto;
+      cursor: pointer;
+      z-index: 100;
+    }
+    #encyclopedia {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 320px;
+      height: 100vh;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 20px;
+      box-shadow: 4px 0 15px rgba(0,0,0,0.2);
+      overflow-y: auto;
+      z-index: 150;
+      display: none;
+      flex-direction: column;
+    }
+    #encyclopedia.open {
+      display: flex;
+    }
+    #encyclopedia h2 {
+      color: #2e7d32;
+      margin-bottom: 15px;
+    }
+    .entry {
+      background: #f1f8e9;
+      padding: 12px;
+      margin-bottom: 15px;
+      border-radius: 10px;
+      text-align: left;
+      border-left: 4px solid #4caf50;
+    }
+    .entry h3 {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+      color: #1b5e20;
+    }
+    .entry p {
+      margin: 4px 0;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+    #closeEncyclopedia {
+      align-self: flex-end;
+      background: #f44336;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 6px 12px;
+      cursor: pointer;
+      margin-bottom: 15px;
+    }
+    /* === FUNDO DA TELA "EXPLORE A CADEIA ALIMENTAR" === */
+    #startScreenBackground {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: #e8f5e9 url('assets/capa2.png') no-repeat center center; /* ← cor de fundo + imagem */
+      background-size: cover;
+      z-index: 90;
+    }
+    /* === TELA DE CAPA COM 5 BORBOLETAS === */
+    .capa {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url('assets/capa.png') no-repeat center center;
+      background-size: cover;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 300;
+      overflow: hidden;
+    }
+
+    .placa {
+      position: absolute;
+      top: 0; /* ← Começa exatamente no topo */
+      left: 50%;
+      transform: translateX(-50%);
+      max-width: 28%;
+      height: auto;
+      animation: balancoPlaca 6s infinite ease-in-out;
+      z-index: 100;
+    }
+    .btn-jogar {
+      position: absolute;
+      bottom: 6%;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 12px 40px;
+      font-size: 1.5rem;
+      font-weight: bold;
+      background-color: #2196F3;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      z-index: 100;
+    }
+
+    .btn-jogar:hover {
+      background-color: #1976D2;
+      transform: translateY(-2px) translateX(-50%);
+    }
+
+    @keyframes balancoPlaca {
+      0%, 100% { transform: translateX(-50%) translateY(0) rotate(-3deg); }
+      50% { transform: translateX(-50%) translateY(5px) rotate(3deg); }
+    }
+
+    .btn-azul {
+      background: #2196F3;
+      color: white;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 24px;
+      font-size: 18px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(33, 150, 243, 0.4);
+      transition: all 0.2s ease;
+    }
+    .btn-azul:hover {
+      background: #1976D2;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 14px rgba(33, 150, 243, 0.5);
+    }
+
+    /* === TELA "EXPLORE A CADEIA ALIMENTAR" SOBRE A CAPA === */
+    #startScreen {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(230, 255, 230, 0.92); /* Verde claro */
+      backdrop-filter: blur(6px);
+      padding: 45px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      max-width: 600px;
+      z-index: 101;
+      color: #1b5e20;
+    }
+
+    #startScreen h2 {
+      font-size: 1.8rem;
+      margin-bottom: 20px;
+      color: #2e7d32;
+    }
+
+    #startScreen p {
+      margin-bottom: 22px;
+      line-height: 1.6;
+      font-size: 1.1rem;
+    }
+
+    #startButton {
+      background: #8D6E63; /* Marrom madeira */
+      color: white;
+      font-weight: bold;
+      border: none;
+      border-radius: 10px;
+      padding: 14px 32px;
+      font-size: 1.25rem;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(141, 110, 99, 0.4);
+      transition: all 0.2s ease;
+    }
+
+    #startButton:hover {
+      background: #6D4C41;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 14px rgba(141, 110, 99, 0.5);
+    }
+
+    #gameArea {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      margin: 0;
+      border-radius: 0;
+      overflow: hidden;
+      box-shadow: none;
+    }
+
+    /* Estilos do fundo aquático */
+    #gameArea.aquatic-phase {
+      background: url('assets/fundo_do_mar.png') no-repeat center center;
+      background-size: cover;
+    }
+
+    @keyframes waterWaves {
+      0% { background-position: 0 0, 0 0; }
+      100% { background-position: 200px 0, 0 100px; }
+    }
+
+    @keyframes float {
+      0% { transform: translateY(0) translateX(0); opacity: 0.4; }
+      100% { transform: translateY(-620px) translateX(100px); opacity: 0.7; }
+    }
+
+    @keyframes scuttle {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(80px); }
+    }
+
+    .decoration {
+      position: absolute;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    #gameArea.dimmed .entity {
+      visibility: hidden;
+    }
+
+    #gameArea.worm-phase,
+    #gameArea.frog-phase,
+    #gameArea.riparian-phase {
+      background: url('assets/floresta_completa.png') no-repeat center center;
+      background-size: cover;
+    }
+
+    .entity {
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent !important;
+      border: none !important;
+      outline: none;
+      box-shadow: none;
+      z-index: 12;
+    }
+
+    .entity img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: transparent !important;
+      border: none !important;
+      pointer-events: none; /* evita interferência em cliques, se necessário */
+    }
+
+    .decorative-object {
+      position: absolute;
+      z-index: 5; /* abaixo das entidades (z-index: 12), acima do fundo */
+      pointer-events: none;
+    }
+    .tree {
+      z-index: 6; /* árvores um pouco acima de pedras/arbustos para profundidade */
+    }
+  
+    #ui {
+      margin-top: 10px;
+      background: rgba(255,255,255,0.85);
+      padding: 12px 24px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    #vidasDisplay {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: white;
+      border: 2px solid black;
+      border-radius: 10px;
+      padding: 6px 12px;
+      font-weight: bold;
+      color: #d32f2f;
+      font-size: 1.1rem;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    .hidden { display: none; }
+
+    #energyBarContainer {
+      position: absolute;
+      top: 20px;
+      left: 70px;
+      width: 150px;
+      height: 20px;
+      background: #ddd;
+      border-radius: 10px;
+      overflow: hidden;
+      z-index: 100;
+    }
+
+    #energyBar {
+      height: 100%;
+      width: 100%;
+      background: #FFD700;
+      transition: width 0.3s;
+    }
+
+    #startButton,
+    #retryButton,
+    button[onclick*="onGameOverRetry"],
+    button[onclick*="nextPhase"],
+    #closeEncyclopedia {
+      background: #2196F3;
+      color: white;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 24px;
+      font-size: 18px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(33, 150, 243, 0.4);
+      transition: all 0.2s ease;
+    }
+    button[onclick*="onGameOverRetry"],
+    button[onclick*="nextPhase"] {
+      padding: 10px 20px;
+      font-size: 16px;
+    }
+    #startButton:hover,
+    button[onclick*="onGameOverRetry"]:hover,
+    button[onclick*="nextPhase"]:hover,
+    #encyclopediaButton:hover,
+    #closeEncyclopedia:hover {
+      background: #1976D2;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 14px rgba(33, 150, 243, 0.5);
+    }
+
+    /* === CARD DE EVOLUÇÃO REESTILIZADO === */
+    #win {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 90%;
+      max-width: 600px;
+      background: #f9f4e8; /* Bege claro elegante */
+      border: 3px solid #2e7d32; /* Verde metálico */
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25), inset 0 0 10px rgba(46, 125, 50, 0.2);
+      z-index: 110;
+      overflow: hidden;
+      text-align: center;
+      padding: 0;
+    }
+
+    /* === CARD DE EVOLUÇÃO (ESTILO SIMPLES) === */
+    #win {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 90%;
+      max-width: 600px;
+      background: #f9f4e8; /* Bege claro */
+      border: 3px solid #2e7d32; /* Borda metálica verde */
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+      z-index: 110;
+      padding: 30px 25px;
+      text-align: center;
+      color: #1b5e20;
+      line-height: 1.5;
+    }
+    
+    /* Conteúdo principal abaixo da faixa */
+    #win .content {
+      padding: 30px 25px 25px;
+      color: #1b5e20;
+      line-height: 1.5;
+      display: flex;
+      flex-direction: column;
+      gap: 24px; /* ← espaçamento entre texto e botão */
+      align-items: center;
+      text-align: center;
+    }
+
+    /* Modal da Enciclopédia */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal.hidden {
+  display: none;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  max-width: 90%;
+  max-height: 90%;
+  overflow-y: auto;
+  position: relative;
+  text-align: center;
+}
+
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 28px;
+  cursor: pointer;
+  color: #555;
+}
+
+.card-image {
+  width: 100%;
+  max-width: 300px;
+  height: auto;
+  margin-bottom: 15px;
+}
+
+.card-info h3 {
+  margin: 10px 0;
+  color: #2e7d32;
+}
+
+.card-info p {
+  margin: 8px 0;
+  line-height: 1.4;
+}
+
+.vol-btn {
+  width: 36px;
+  height: 36px;
+  font-size: 18px;
+  background: #2196F3;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.vol-btn:hover {
+  background: #0d8aed;
+}
+/* Estilo fino da barra de rolagem nos navegadores WebKit (Chrome, Edge, Safari) */
+#creditsModal ::-webkit-scrollbar {
+  width: 8px;
+}
+#creditsModal ::-webkit-scrollbar-track {
+  background: #111;
+  border-radius: 4px;
+}
+#creditsModal ::-webkit-scrollbar-thumb {
+  background: #555;
+  border-radius: 4px;
+}
+#creditsModal ::-webkit-scrollbar-thumb:hover {
+  background: #777;
+}
+  </style>
+</head>
+<body>
+  <audio id="backgroundMusic" src="music/musica_jogo.mp3" loop></audio>
+  <audio id="menuMusic" src="music/musica_menu.mp3" loop></audio>
+  <audio id="clickSound" src="music/click.mp3"></audio>
+  <div id="coverScreen" class="capa">
+  <img src="assets/placa_capa.png" alt="Cadeia Viva" class="placa" />
+  <button id="coverStartButton" class="btn-jogar">Jogar</button>
+</div>
+  <div id="startScreenBackground" class="hidden" style="
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('assets/capa2.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: -1;
+"></div>
+  <h1 id="gameTitle" class="hidden">🌿 Cadeia Viva: Evolução na Natureza 🌿</h1>
+  <div id="energyBarContainer" class="hidden">
+    <div id="energyBar"></div>
+  </div>
+  <div id="vidasDisplay" class="hidden">
+    <span>❤</span><span id="vidasNumero">2</span>
+  </div>
+  <!-- Botão de Configuração (aparece a partir da tela "Explore") -->
+  
+  <img id="configButton" src="assets/botao_config.png" alt="Configurações" />
+  
+  <div id="startScreen">
+    <h2>🔍 Explore a Cadeia Alimentar!</h2>
+    <p>Você irá começar como uma minhoca e evoluirá ao sobreviver.</p>
+    <p>Cada fase mostra seu nível trófico e o tipo de consumidor você é.</p>
+    <button id="startButton">Começar</button>
+  </div>
+  <div id="gameArea">
+    <!-- Camada 1: fundo (grama, água, etc.) -->
+    <div class="background"></div>
+
+    <!-- Camada 2: personagens (jogador + predadores) -->
+    <div id="characters"></div>
+
+    <!-- Camada 3: elementos que cobrem (árvores, arbustos, folhagem alta) -->
+    <div id="foreground-overlay"></div>
+  </div>
+  <div id="ui" class="hidden">
+    <div id="status">Você é uma minhoca. Coma 3 folhas antes do sapo te pegar!</div>
+  </div>
+  <div id="gameOver" class="hidden">
+    <h2>☠ Game Over!</h2>
+    <p>Você perdeu todas as suas vidas!</p>
+    <button id="retryButton">Tentar Novamente</button>
+  </div>
+  <div id="win" class="hidden">
+    <div class="content">
+      <p id="winText"></p>
+      <button onclick="mostrarPergunta()" class="btn-azul">Continuar</button>
+    </div>
+</div>
+  </div>
+  <div id="encyclopediaButton" title="Abrir Enciclopédia" class="hidden">
+    <img src="assets/botao_enciclopedia.png" alt="Enciclopédia" />
+  </div>
+  <div id="encyclopedia">
+    <button id="closeEncyclopedia">Fechar</button>
+    <h2>📘 Enciclopédia</h2>
+  </div>
+
+  <!-- Modal da Enciclopédia (FORA da sidebar!) -->
+  <div id="encyclopediaModal" class="modal hidden">
+    <div class="modal-content">
+      <span class="close-btn" onclick="document.getElementById('encyclopediaModal').classList.add('hidden')">&times;</span>
+      <img id="modalCardImage" src="" alt="Card do animal" class="card-image">
+      <div id="modalInfo" class="card-info"></div>
+    </div>
+  </div>
+
+<!-- Modal de Créditos -->
+<div id="creditsModal" class="modal hidden">
+  <div style="
+    position: relative;
+    width: 90%;
+    max-width: 600px;
+    max-height: 85vh;
+    background: rgba(0, 0, 0, 0.75);
+    border-radius: 16px;
+    padding: 30px;
+    overflow-y: auto;
+    color: white;
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    text-align: center;
+    scrollbar-width: thin;
+    scrollbar-color: #555 #222;
+  ">
+    <h2 style="margin-bottom: 20px; font-size: 24px;">Créditos</h2>
+    <p style="margin: 12px 0;">
+      2025–2026, Franciele Silva Melo & Rayla Lima.<br>
+      Todos os direitos reservados.
+    </p>
+    <p style="margin: 12px 0;">
+      Cadeia Viva: Evolução na Natureza é um projeto autoral<br>
+      desenvolvido no Brasil.
+    </p>
+    <p style="margin: 12px 0; font-weight: bold;">Desenvolvimento</p>
+    <p style="margin: 12px 0;">
+      Programação · Código · Game Design · Implementação · Interface<br>
+      <strong>Franciele Silva Melo</strong>
+    </p>
+    <p style="margin: 12px 0; font-weight: bold;">Suporte Criativo</p>
+    <p style="margin: 12px 0;">
+      <strong>Rayla Lima</strong>
+    </p>
+    <p style="margin: 12px 0; font-weight: bold;">Arte e Imagens</p>
+    <p style="margin: 12px 0;">
+      Imagens geradas por Inteligência Artificial (IA)<br>
+      Criação, edição e adaptação:<br>
+      <strong>Franciele Silva Melo<br>Rayla Lima</strong>
+    </p>
+    <p style="margin: 12px 0; font-weight: bold;">Música e Áudio</p>
+    <p style="margin: 12px 0;">
+      Músicas e efeitos sonoros obtidos do Pixabay
+    </p>
+    <p style="margin: 12px 0; font-weight: bold;">Finalidade Educacional</p>
+    <p style="margin: 12px 0;">
+      Este jogo foi desenvolvido com fins educacionais.
+    </p>
+    <p style="margin: 12px 0; font-weight: bold;">Informações da Versão</p>
+    <p style="margin: 12px 0;">
+      Versão BETA<br>
+      Desenvolvido entre 2025 e 2026<br>
+      Pode conter bugs ou sofrer alterações futuras
+    </p>
+    <p style="margin: 12px 0; font-style: italic;">
+      Qualquer semelhança com outros projetos, jogos ou obras<br>
+      é mera coincidência.
+    </p>
+    <button id="closeCreditsButton" style="
+      margin-top: 25px;
+      background: #2196F3;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.2s;
+    ">Fechar</button>
+  </div>
+</div>
+
+  <!-- ✅ PAINÉIS DE CONFIGURAÇÃO (FORA DE QUALQUER OUTRO ELEMENTO) -->
+<div id="configMenu" class="modal hidden" style="background: rgba(0,0,0,0.85); flex-direction: column; align-items: center; justify-content: center;">
+  <h2 style="margin-bottom: 30px; font-size: 28px; color: white;">Configurações</h2>
+  <button id="audioConfigBtn" class="btn-azul" style="margin: 10px; padding: 12px 24px;">Configuração</button>
+  <button id="creditsFromConfigBtn" class="btn-azul" style="margin: 10px; padding: 12px 24px;">Créditos</button>
+  <button id="closeConfigMenu" style="margin-top: 30px; background: #666; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">Voltar</button>
+</div>
+
+<div id="audioPanel" class="modal hidden" style="background: rgba(0,0,0,0.85); flex-direction: column; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;">
+  <h2 style="margin-bottom: 20px; font-size: 26px; color: white;">Áudio</h2>
+  <div style="margin: 15px 0; width: 80%; max-width: 500px;">
+    <label style="color: white;">Música do Jogo</label>
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <button class="vol-btn" data-audio="game" data-action="dec">−</button>
+      <input type="range" id="volGame" min="0" max="100" value="70" style="flex: 1;">
+      <button class="vol-btn" data-audio="game" data-action="inc">+</button>
+    </div>
+  </div>
+  <div style="margin: 15px 0; width: 80%; max-width: 500px;">
+    <label style="color: white;">Música do Menu</label>
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <button class="vol-btn" data-audio="menu" data-action="dec">−</button>
+      <input type="range" id="volMenu" min="0" max="100" value="70" style="flex: 1;">
+      <button class="vol-btn" data-audio="menu" data-action="inc">+</button>
+    </div>
+  </div>
+  <div style="margin: 15px 0; width: 80%; max-width: 500px;">
+    <label style="color: white;">Som de Clique</label>
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <button class="vol-btn" data-audio="click" data-action="dec">−</button>
+      <input type="range" id="volClick" min="0" max="100" value="80" style="flex: 1;">
+      <button class="vol-btn" data-audio="click" data-action="inc">+</button>
+    </div>
+  </div>
+  <button id="backFromAudio" style="margin-top: 30px; background: #666; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">Voltar</button>
+</div>
+</body>
+
+  <script>
+    // === SISTEMA DE DETECÇÃO AUTOMÁTICA DE PLATAFORMA (MOBILE / DESKTOP) ===
+const GAME_MODE = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+                  ('ontouchstart' in window && navigator.maxTouchPoints > 1)
+                  ? 'mobile' : 'desktop';
+
+console.log('Modo detectado:', GAME_MODE);
+
+// Função para verificar se o modo é mobile
+function isMobile() {
+    return GAME_MODE === 'mobile';
+}
+
+// Função para verificar se o modo é desktop
+function isDesktop() {
+    return GAME_MODE === 'desktop';
+}
+
+// Desativa eventos conflitantes com base no modo
+document.addEventListener('keydown', (e) => {
+    if (isMobile()) {
+        e.preventDefault(); // opcional: evita scroll acidental no mobile com teclas
+    }
+});
+
+// Impede que eventos de toque sejam processados no desktop
+document.addEventListener('touchstart', (e) => {
+    if (isDesktop()) {
+        e.preventDefault();
+        return;
+    }
+}, { passive: false });
+
+// Se for mobile, garanta que os controles visuais sejam ativados mais tarde (ex: em initPhase ou startGame)
+// Se for desktop, não crie botões na tela — use apenas teclado/mouse
+
+// Exemplo de uso futuro (opcional): ativar/desativar UI específica
+if (isMobile()) {
+    // Você pode adicionar aqui lógica futura para criar joystick/botões
+    // Ex: criar elementos DOM para controles virtuais quando entrar no jogo
+} else {
+    // Nada extra: já usa teclado/mouse por padrão
+}
+
+    // === Definição dos níveis tróficos e tipos ===
+    const trophicInfo = {
+      '🐛': { level: 2, type: 'consumidor primário' },
+      '🐸': { level: 3, type: 'consumidor secundário' },
+      '🐍': { level: 4, type: 'consumidor terciário' },
+      '🦅': { level: 5, type: 'consumidor quaternário' },
+      '🪱': { level: 2, type: 'consumidor primário' },
+      '🐠': { level: 3, type: 'consumidor secundário' },
+      '🦭': { level: 4, type: 'consumidor terciário' },
+      '🦈': { level: 5, type: 'consumidor quaternário' }
+    };
+
+    function getSpriteName(emoji) {
+      const map = {
+        // === Cadeia terrestre ===
+        '🐛': 'lagarta',
+        '🐸': 'sapo',
+        '🐍': 'cobra',
+        '🦅': 'gaviao',
+        '👨‍🦯': 'cacador',
+        '🍃': 'planta',
+        // === Cadeia aquática ===
+        '🦠': 'fitoplancton',
+        '🪱': 'zooplancton',
+        '🐠': 'sardinha',
+        '🦭': 'foca',
+        '🦈': 'tubarao',
+      };
+      return map[emoji] || null;
+    }
+
+    // === GERADOR DA ENCICLOPÉDIA ===
+    function renderEncyclopediaList() {
+      const encyclopedia = document.getElementById('encyclopedia');
+      if (!encyclopedia) return;
+
+      // Lista de entradas da enciclopédia
+      const animais = [
+        { id: 'planta', name: 'Planta' },
+        { id: 'lagarta', name: 'Lagarta' },
+        { id: 'sapo', name: 'Sapo' },
+        { id: 'cobra', name: 'Cobra' },
+        { id: 'gaviao', name: 'Gavião' },
+        { id: 'cacador', name: 'Caçador (Humano)' },
+        { id: 'fitoplancton', name: 'Fitoplâncton' },
+        { id: 'zooplancton', name: 'Zooplâncton' },
+        { id: 'sardinha', name: 'sardinha' },
+        { id: 'foca', name: 'Foca' },
+        { id: 'tubarao', name: 'Tubarão' },
+        { id: 'decompositores_terrestres', name: 'Decompositores Terrestres' },
+        { id: 'decompositores_aquaticos', name: 'Decompositores Aquáticos' }
+      ];
+
+      // Limpa o conteúdo anterior
+      encyclopedia.innerHTML = `
+        <button id="closeEncyclopedia" style="align-self:flex-end;margin-bottom:15px;">Fechar</button>
+        <h2>📘 Enciclopédia</h2>
+        <div id="encyclopediaList" style="display:flex;flex-direction:column;gap:12px;"></div>
+      `;
+
+      const listContainer = document.getElementById('encyclopediaList');
+
+      animais.forEach(entry => {
+        const item = document.createElement('div');
+        item.style.display = 'flex';
+        item.style.alignItems = 'center';
+        item.style.gap = '12px';
+        item.style.padding = '10px';
+        item.style.background = '#f1f8e9';
+        item.style.borderRadius = '10px';
+        item.style.cursor = 'pointer';
+        item.style.borderLeft = '4px solid #4caf50';
+
+        // Usa entry.id diretamente para o nome do sprite e do card
+        item.innerHTML = `
+          <img src="assets/${entry.id}.png" alt="${entry.name}" style="width:40px;height:40px;object-fit:contain;background:transparent;">
+          <span>${entry.name}</span>
+        `;
+
+        item.addEventListener('click', () => {
+          // Define o caminho do card usando entry.id + "_card.png"
+          document.getElementById('modalCardImage').src = `assets/${entry.id}_card.png`;
+          document.getElementById('encyclopediaModal').classList.remove('hidden');
+        });
+
+        listContainer.appendChild(item);
+      });
+
+      // Reatribui o evento de fechar (já que o botão foi recriado)
+      document.getElementById('closeEncyclopedia').onclick = () => {
+        encyclopedia.classList.remove('open');
+      };
+    }
+
+    function showEncyclopediaDetail(entry) {
+      const list = document.getElementById('encyclopediaList');
+      const detail = document.getElementById('encyclopediaDetail');
+  
+      list.style.display = 'none';
+      detail.style.display = 'flex';
+
+      let typeInfo = '';
+      if (entry.type === 'produtor') {
+        typeInfo = `
+          <p><strong>Tipo:</strong> Produtor</p>
+          <p><strong>Nível trófico:</strong> 1</p>
+        `;
+      } else {
+        const consumerTypeLabel = {
+          'herbívoro': 'Herbívoro',
+          'carnívoro': 'Carnívoro',
+          'onívoro': 'Onívoro'
+        }[entry.consumerType] || entry.consumerType;
+
+        typeInfo = `
+          <p><strong>Tipo:</strong> Consumidor</p>
+          <p><strong>Tipo de consumidor:</strong> ${consumerTypeLabel}</p>
+          <p><strong>Nível trófico:</strong> ${entry.trophicLevel}</p>
+        `;
+      }
+
+      detail.innerHTML = `
+        <img src="assets/${entry.sprite}" alt="${entry.name}" style="width:120px;height:120px;object-fit:contain;background:transparent;margin-bottom:15px;">
+        <h3 style="color:#1b5e20;margin-bottom:10px;">${entry.name}</h3>
+        <div style="text-align:center;line-height:1.5;margin-bottom:15px;">
+          ${typeInfo}
+          <p><strong>Curiosidade:</strong> ${entry.curiosity}</p>
+          <p><strong>Importância:</strong> ${entry.importance}</p>
+        </div>
+        <button id="btnBackToList" style="background:#2196F3;color:white;border:none;border-radius:6px;padding:8px 16px;cursor:pointer;">← Voltar à lista</button>
+      `;
+
+      document.getElementById('btnBackToList').onclick = () => {
+        detail.style.display = 'none';
+        list.style.display = 'flex';
+      };
+    }
+    
+    const chain1 = [
+      { playerEmoji: '🐛', predatorEmoji: '🐸', foodEmoji: '🍃', foodCount: 3, playerSpeed: 8, predatorSpeed: 1.5, status: 'Você é uma minhoca (consumidor primário - nível trófico 2). Coma 3 folhas antes do sapo te pegar!', theme: 'worm', foodType: 'leaf' },
+      { playerEmoji: '🐸', predatorEmoji: '🐍', foodEmoji: '🐛', foodCount: 3, playerSpeed: 9, predatorSpeed: 1.8, status: 'Você é um sapo (consumidor secundário - nível trófico 3). Caçe 3 minhocas antes da cobra te pegar!', theme: 'frog', foodType: 'worm' },
+      { playerEmoji: '🐍', predatorEmoji: '🦅', foodEmoji: '🐸', foodCount: 3, playerSpeed: 10, predatorSpeed: 2.0, status: 'Você é uma cobra (consumidor terciário - nível trófico 4). Caçe 3 sapos entre as folhas úmidas da mata ciliar!', theme: 'riparian', foodType: 'frog' },
+      { playerEmoji: '🦅', predatorEmoji: '👨‍🦯', foodEmoji: '🐍', foodCount: 3, playerSpeed: 11, predatorSpeed: 3.0, status: 'Você é um gavião. Sobrevoe a mata ciliar e caçe cobras!', theme: 'riparian', foodType: 'snake' }
+    ];
+
+    // === CADEIA AQUÁTICA REVISADA ===
+    const chain2 = [
+      { playerEmoji: '🪱', predatorEmoji: '🐠', foodEmoji: '🦠', foodCount: 3, playerSpeed: 5, predatorSpeed: 1.5, status: 'Parabéns! Você está na cadeia alimentar aquática.\nVocê é um zooplâncton (consumidor primário - nível trófico 2). Coma 3 bactérias antes do peixe te pegar!', theme: 'aquatic', foodType: 'bacteria' },
+      { playerEmoji: '🐠', predatorEmoji: '🦭', foodEmoji: '🪱', foodCount: 3, playerSpeed: 7, predatorSpeed: 2.0, status: 'Você é um peixe pequeno (consumidor secundário - nível trófico 3). Coma 3 zooplânctons antes da foca te pegar!', theme: 'aquatic', foodType: 'zooplankton' },
+      { playerEmoji: '🦭', predatorEmoji: '🦈', foodEmoji: '🐠', foodCount: 3, playerSpeed: 8, predatorSpeed: 3.0, status: 'Você é uma foca (consumidor terciário - nível trófico 4). Caçe 3 peixes antes do tubarão te pegar!', theme: 'aquatic', foodType: 'fish' },
+    ];
+
+    let currentChain = 1;
+    let currentPhase = 0;
+    let completedLevels = [];
+    let proximaFaseEhAquatica = false;
+    let player = { x: 450, y: 500 };
+    let predator = { x: 100, y: 100, patrolDirection: { dx: 0, dy: 0 }, patrolTimer: 0 };
+    let foods = [];
+    let collectedCount = 0;
+    let gameOver = false;
+    let winPhase = false;
+    let animationId = null;
+    let moveFoodsId = null;
+    let energia = 100;
+    let energiaInterval;
+    let vidas = 2;
+    let isPlayerHidden = false;
+    window.decorObjects = [];
+    const VIDAS_INICIAIS = 2;
+    const ENERGIA_BASE = 100;
+    const REDUCAO_POR_FASE = 20;
+
+    const gameArea = document.getElementById('gameArea');
+    const statusEl = document.getElementById('status');
+    const energyBar = document.getElementById('energyBar');
+    const gameOverEl = document.getElementById('gameOver');
+    const winEl = document.getElementById('win');
+    const startScreen = document.getElementById('startScreen');
+    const coverScreen = document.getElementById('coverScreen');
+    const coverStartButton = document.getElementById('coverStartButton');
+    const startButton = document.getElementById('startButton');
+    // const winTitleEl = document.getElementById('winTitle'); // REMOVIDO – título é fixo no HTML
+    const winTextEl = document.getElementById('winText');
+    const vidasDisplay = document.getElementById('vidasDisplay');
+    const encyclopediaButton = document.getElementById('encyclopediaButton');
+    const encyclopedia = document.getElementById('encyclopedia');
+    const closeEncyclopedia = document.getElementById('closeEncyclopedia');
+
+    encyclopediaButton.addEventListener('click', () => {
+      playClickSound();
+      renderEncyclopediaList();
+      encyclopedia.classList.add('open');
+    });
+    closeEncyclopedia.addEventListener('click', () => {
+      playClickSound();
+      encyclopedia.classList.remove('open');
+    });
+
+    document.getElementById('retryButton').addEventListener('click', () => {
+      playClickSound();
+      onGameOverRetry();
+    });
+
+    // Botão de configuração (imagem)
+    document.getElementById('configButton').addEventListener('click', () => {
+      playClickSound();
+      document.getElementById('configMenu').classList.remove('hidden');
+    });
+
+    document.getElementById('closeCreditsButton').addEventListener('click', () => {
+      playClickSound();
+      document.getElementById('creditsModal').classList.add('hidden');
+    });
+
+    // Fechar menu de configuração
+    document.getElementById('closeConfigMenu').addEventListener('click', () => {
+      playClickSound();
+      document.getElementById('configMenu').classList.add('hidden');
+    });
+
+    // Ir para painel de áudio
+    document.getElementById('audioConfigBtn').addEventListener('click', () => {
+      playClickSound();
+      loadSavedVolumes();
+      document.getElementById('audioPanel').classList.remove('hidden');
+      document.getElementById('configMenu').classList.add('hidden');
+    });
+
+    // Voltar do áudio
+    document.getElementById('backFromAudio').addEventListener('click', () => {
+      playClickSound();
+      document.getElementById('audioPanel').classList.add('hidden');
+      document.getElementById('configMenu').classList.remove('hidden');
+    });
+
+    // Créditos pelo menu de configuração
+    document.getElementById('creditsFromConfigBtn').addEventListener('click', () => {
+      playClickSound();
+      document.getElementById('configMenu').classList.add('hidden');
+      document.getElementById('creditsModal').classList.remove('hidden');
+    });
+
+    // Controles +/−
+    document.querySelectorAll('.vol-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const audioType = btn.dataset.audio;
+        const action = btn.dataset.action;
+        const delta = action === 'inc' ? 10 : -10;
+        updateVolume(audioType, delta);
+      });
+    });
+
+    // Barras deslizantes
+    ['Game', 'Menu', 'Click'].forEach(name => {
+      const el = document.getElementById(`vol${name}`);
+      el.addEventListener('input', () => {
+        volumes[name.toLowerCase()] = parseInt(el.value);
+        applyVolumes();
+      });
+    });
+
+    let playerEl, predatorEl, foodEls = [];
+
+    function atualizarVidas() {
+      document.getElementById('vidasNumero').textContent = vidas;
+    }
+    function atualizarBarraEnergia() {
+      const porcentagem = (energia / ENERGIA_BASE) * 100;
+      energyBar.style.width = porcentagem + "%";
+    }
+
+    function randomPosition() {
+      const rect = gameArea.getBoundingClientRect();
+      return {
+        x: 50 + Math.random() * (rect.width - 100),
+        y: 50 + Math.random() * (rect.height - 100)
+      };
+    }
+    
+    function getCurrentPhaseData() {
+      if (currentChain === 1) return chain1[currentPhase];
+      else return chain2[currentPhase];
+    }
+    function criarCenarioFloresta() {
+      window.decorObjects = []; // limpa obstáculos anteriores
+
+      // === ÁRVORES (5) – só o TRONCO tem colisão ===
+      const arvores = [
+        { x: 420, y: 240 },
+        { x: 1300, y: 260 },
+        { x: 960, y: 520 },
+        { x: 1400, y: 720 },
+        { x: 500, y: 720 }
+      ];
+      arvores.forEach(pos => {
+        // Imagem da árvore inteira (tronco + copa)
+        const arvore = document.createElement('img');
+        arvore.src = 'assets/arvore.png';
+        arvore.className = 'decorative-object tree';
+        arvore.style.left = (pos.x - 250) + 'px'; // centro visual da imagem
+        arvore.style.top = (pos.y - 400) + 'px';
+        arvore.style.width = '400px';
+        arvore.style.height = 'auto';
+        gameArea.appendChild(arvore);
+
+          // TRONCO: colisão sólida — alinhada ao tronco VISUAL
+          // A imagem tem 500x800, mas o tronco começa ~200px abaixo do topo e ~220px à esquerda do centro
+          window.decorObjects.push({
+            x: (pos.x - 250) + 220,   // ← esquerda da imagem + offset do tronco
+            y: (pos.y - 400) + 225,   // ← topo da imagem + início do tronco
+            width: 30,
+            height: 100,
+            type: 'solid'
+          });
+
+        //  OCULTAÇÃO: COPA DA ÁRVORE (folhas)
+        window.decorObjects.push({
+          x: pos.x - 200,  // cobre a área das folhas
+          y: pos.y - 350,  // começa bem acima
+          width: 400,
+          height: 250,     // altura da copa
+          type: 'occlusion'
+        });
+      });
+
+      // === ARBUSTOS (2) – hideout: esconde jogador da detecção do predador ===
+      const arbustos = [
+        { x: 100, y: 405 },
+        { x: 1450, y: 350 },
+        { x: 850, y: 70 },
+        { x: 900, y: 700 }  
+      ];
+      arbustos.forEach(pos => { 
+        const arbusto = document.createElement('img');
+        arbusto.src = 'assets/arbusto.png';
+        arbusto.className = 'decorative-object';
+        arbusto.style.left = (pos.x - 100) + 'px';
+        arbusto.style.top = (pos.y - 100) + 'px';
+        arbusto.style.width = '200px';
+        gameArea.appendChild(arbusto);
+
+        // Área de esconderijo (não bloqueia movimento, só esconde)
+        window.decorObjects.push({
+          x: pos.x - 80,
+          y: pos.y - 80,
+          width: 160,
+          height: 100,
+          type: 'hideout' // ← novo tipo!
+        });
+      });
+    }
+    function criarCenarioAquatico() {
+      window.decorObjects = []; // limpa obstáculos anteriores
+
+      // === CORAIS (2) – sólidos, bloqueiam movimento ===
+      const corais = [
+        { x: 1400, y: 550 },
+        { x: 400, y: 690 },
+      ];
+      corais.forEach(pos => {
+        const coral = document.createElement('img');
+        coral.src = 'assets/coral_roxo.png';
+        coral.className = 'decorative-object';
+        coral.style.left = (pos.x - 60) + 'px'; // ajuste visual
+        coral.style.top = (pos.y - 80) + 'px';
+        coral.style.width = '120px';
+        coral.style.height = 'auto';
+        gameArea.appendChild(coral);
+
+        // Colisão sólida (tronco-like)
+        window.decorObjects.push({
+          x: pos.x - 30,
+          y: pos.y - 60,
+          width: 60,
+          height: 90,
+          type: 'solid'
+        });
+      });
+
+      // === ALGAS NOS CANTOS (1) – esconderijo ===
+      const algasCanto = [
+        { x: 1430, y: 590 }  // inferior direito
+      ];
+      algasCanto.forEach(pos => {
+        const alga = document.createElement('img');
+        alga.src = 'assets/algas_canto.png';
+        alga.className = 'decorative-object';
+        alga.style.left = (pos.x - 70) + 'px';
+        alga.style.top = (pos.y - 90) + 'px';
+        alga.style.width = '280px';
+        gameArea.appendChild(alga);
+
+        window.decorObjects.push({
+          x: pos.x - 60,
+          y: pos.y - 80,
+          width: 120,
+          height: 100,
+          type: 'hideout'
+        });
+      });
+
+      // === GRUPOS DE ALGAS (4) – esconderijo ===
+      const gruposAlgas = [
+        { x: 190, y: 470 },
+        { x: 1100, y: 480 },
+        { x: 750, y: 590 }
+      ];
+      gruposAlgas.forEach(pos => {
+        const alga = document.createElement('img');
+        alga.src = 'assets/algas.png';
+        alga.className = 'decorative-object';
+        alga.style.left = (pos.x - 50) + 'px';
+        alga.style.top = (pos.y - 70) + 'px';
+        alga.style.width = '100px';
+        gameArea.appendChild(alga);
+
+        window.decorObjects.push({
+          x: pos.x - 40,
+          y: pos.y - 60,
+          width: 80,
+          height: 90,
+          type: 'hideout'
+        });
+      });
+    }  
+    function moveFoods() {
+      if (gameOver || winPhase || !foods.length) return;
+      const phase = getCurrentPhaseData();
+      const rect = gameArea.getBoundingClientRect();
+      const maxX = rect.width - 25;
+      const maxY = rect.height - 25;
+
+      // Tipos que NÃO se movem
+      const staticFoodTypes = ['leaf', 'bacteria']; // ← planta e fitoplâncton
+
+      foods.forEach((food, i) => {
+        if (food.collected) return;
+
+        // Só move se NÃO for planta ou fitoplâncton
+        if (!staticFoodTypes.includes(phase.foodType)) {
+          // Inicializa direção aleatória na primeira vez
+          if (!food.dx || !food.dy) {
+            food.dx = (Math.random() - 0.5) * 2; // -1 a +1
+            food.dy = (Math.random() - 0.5) * 2;
+          }
+
+          // Move com velocidade suave
+          food.x += food.dx * 1.0;
+          food.y += food.dy * 1.0;
+
+         // Rebate nas bordas
+         if (food.x <= 25 || food.x >= maxX) food.dx *= -1;
+         if (food.y <= 25 || food.y >= maxY) food.dy *= -1;
+
+         // Limita dentro dos limites
+         food.x = Math.max(25, Math.min(maxX, food.x));
+         food.y = Math.max(25, Math.min(maxY, food.y));
+        }
+
+        // Atualiza posição visual
+        foodEls[i].style.left = (food.x - 25) + 'px';
+        foodEls[i].style.top = (food.y - 25) + 'px';
+      });
+
+      moveFoodsId = requestAnimationFrame(moveFoods);
+    }
+    function initPhase() {
+      // Sincroniza currentChain com currentMode (se o botão estiver ativo)
+      if (typeof currentMode !== 'undefined') {
+        currentChain = currentMode === 'aquatic' ? 2 : 1;
+      }
+      
+      if (animationId) cancelAnimationFrame(animationId);
+      if (moveFoodsId) cancelAnimationFrame(moveFoodsId);
+      clearInterval(energiaInterval);
+
+      const phase = getCurrentPhaseData();
+      // O jogador começa como consumidor primário → já perdeu 20%
+      energia = ENERGIA_BASE - ((currentPhase + 1) * REDUCAO_POR_FASE);
+      if (energia < 20) energia = 20;
+
+      gameArea.innerHTML = '';
+
+      // Define o fundo da fase
+      if (phase.theme === 'worm' || phase.theme === 'frog' || phase.theme === 'riparian') {
+        gameArea.className = 'worm-phase';
+      } else if (phase.theme === 'aquatic') {
+        gameArea.className = 'aquatic-phase';
+      }
+
+      // === CENÁRIO DECORATIVO POR AMBIENTE ===
+      if (phase.theme === 'aquatic') {
+        criarCenarioAquatico();
+      } else {
+        criarCenarioFloresta();
+      }
+
+      // === ENTIDADES DO JOGO ===
+      playerEl = document.createElement('div');
+      playerEl.className = 'entity';
+
+      const playerSprite = getSpriteName(phase.playerEmoji);
+      let playerSize = 50; // padrão
+
+      // Ajuste de tamanho harmonioso (caçador é o maior)
+      if (playerSprite === 'sapo') playerSize = 90;
+      else if (playerSprite === 'cobra') playerSize = 130;
+      else if (playerSprite === 'gaviao') playerSize = 130;
+      else if (playerSprite === 'cacador') playerSize = 160;
+      else if (playerSprite === 'foca') playerSize = 110;
+      else if (playerSprite === 'tubarao') playerSize = 140;
+
+      playerEl.style.width = playerSize + 'px';
+      playerEl.style.height = playerSize + 'px';
+
+      if (playerSprite) {
+        playerEl.innerHTML = `<img src="assets/${playerSprite}.png" style="width:100%;height:100%;object-fit:contain;">`;
+      } else {
+        playerEl.textContent = phase.playerEmoji;
+      }
+      gameArea.appendChild(playerEl);
+
+      if (phase.predatorEmoji) {
+        predatorEl = document.createElement('div');
+        predatorEl.className = 'entity';
+
+        const predatorSprite = getSpriteName(phase.predatorEmoji);
+        let predatorSize = 50;
+
+        if (predatorSprite === 'sapo') predatorSize = 90;
+        else if (predatorSprite === 'cobra') predatorSize = 130;
+        else if (predatorSprite === 'gaviao') predatorSize = 130;
+        else if (predatorSprite === 'cacador') predatorSize = 160;
+        else if (predatorSprite === 'foca') predatorSize = 110;
+        else if (predatorSprite === 'tubarao') predatorSize = 140;
+
+        predatorEl.style.width = predatorSize + 'px';
+        predatorEl.style.height = predatorSize + 'px';
+
+        if (predatorSprite) {
+          predatorEl.innerHTML = `<img src="assets/${predatorSprite}.png" style="width:100%;height:100%;object-fit:contain;">`;
+        } else {
+          predatorEl.textContent = phase.predatorEmoji;
+        }
+        gameArea.appendChild(predatorEl);
+      } else {
+        predatorEl = null;
+      }
+
+      foodEls = [];
+      foods = [];
+      for (let i = 0; i < phase.foodCount; i++) {
+        const food = document.createElement('div');
+        food.className = 'entity';
+        food.innerHTML = `<img src="assets/${getSpriteName(phase.foodEmoji)}.png" style="width:100%;height:100%;object-fit:contain;">`;
+        gameArea.appendChild(food);
+        foodEls.push(food);
+        foods.push({ ...randomPosition(), collected: false });
+      }
+
+      player.x = 450;
+      player.y = 500;
+      if (predatorEl) {
+        const rect = gameArea.getBoundingClientRect();
+        predator.x = Math.random() > 0.5 ? 50 : rect.width - 50;
+        predator.y = (rect.height / 2) + (Math.random() * 100 - 50);
+      }
+
+      statusEl.textContent = phase.status.replace('\n', ' ');
+      collectedCount = 0;
+      winPhase = false;
+      gameOver = false;
+      gameOverEl.classList.add('hidden');
+      winEl.classList.add('hidden');
+
+      atualizarBarraEnergia();
+      // Não reduz energia no último nível de cada cadeia (gavião e tubarão)
+      if (!((currentChain === 1 && currentPhase === chain1.length - 1) ||
+            (currentChain === 2 && currentPhase === chain2.length - 1))) {
+      }
+      updateDisplay();
+
+      document.getElementById('vidasDisplay').classList.remove('hidden');
+      document.getElementById('encyclopediaButton').classList.remove('hidden');
+      document.getElementById('energyBarContainer').classList.remove('hidden');
+
+      if (predatorEl) {
+        movePredator();
+      }
+      // Move comidas mesmo sem predador (ex: fase final)  
+        moveFoods();
+    }
+
+    // Só cria controles se for mobile
+    if (isMobile()) {
+	      // Exemplo: botão "Correr" (você pode expandir depois)
+	      const btnCorrer = document.createElement('div');
+	      btnCorrer.className = 'mobile-control';
+	      btnCorrer.style.cssText = `
+		        position: absolute;
+		        bottom: 20px;
+		        right: 20px;
+		        width: 70px;
+		        height: 70px;
+	        	background: rgba(33, 150, 243, 0.8);
+	        	border-radius: 50%;
+	        	display: flex;
+	         	align-items: center;
+	        	justify-content: center;
+		        color: white;
+		        font-weight: bold;
+		        font-size: 16px;
+		        user-select: none;
+		        z-index: 100;
+	      `;
+	      btnCorrer.textContent = '🏃';
+	      btnCorrer.addEventListener('touchstart', (e) => {
+		        e.preventDefault();
+		        // Ação futura: aumentar velocidade temporariamente
+	      });
+	      document.body.appendChild(btnCorrer);
+    }
+    function updateDisplay() {
+      // Centralização dinâmica (funciona com qualquer tamanho)
+      playerEl.style.left = (player.x - playerEl.offsetWidth / 2) + 'px';
+      playerEl.style.top = (player.y - playerEl.offsetHeight / 2) + 'px';
+
+      if (predatorEl) {
+        predatorEl.style.left = (predator.x - predatorEl.offsetWidth / 2) + 'px';
+        predatorEl.style.top = (predator.y - predatorEl.offsetHeight / 2) + 'px';
+      }
+
+      // Atualiza posição e visibilidade das comidas
+      foodEls.forEach((el, i) => {
+      if (!foods[i].collected) {
+        el.style.left = (foods[i].x - 25) + 'px';
+        el.style.top = (foods[i].y - 25) + 'px';
+        el.style.display = 'flex';
+      } else {
+        el.style.display = 'none';
+      }
+    });
+
+    // === Y-SORT inicial (baseado em Y para profundidade) ===
+    playerEl.style.zIndex = Math.floor(player.y);
+    if (predatorEl) {
+      predatorEl.style.zIndex = Math.floor(predator.y);
+    }
+    foodEls.forEach((el, i) => {
+      if (!foods[i].collected) {
+        el.style.zIndex = Math.floor(foods[i].y);
+      }
+    });
+
+    // === VERIFICA OCULTAÇÃO DO JOGADOR ===
+    const playerCenter = { x: player.x, y: player.y };
+    let isPlayerInHideout = false;        // impede perseguição
+    let isPlayerVisuallyOccluded = false; // só efeito visual
+
+    if (window.decorObjects) {
+      for (const obj of window.decorObjects) {
+        const inObj = (
+          playerCenter.x >= obj.x &&
+          playerCenter.x <= obj.x + obj.width &&
+          playerCenter.y >= obj.y &&
+          playerCenter.y <= obj.y + obj.height
+        );
+
+        if (obj.type === 'hideout' && inObj) {
+          isPlayerInHideout = true;
+        }
+
+        if ((obj.type === 'occlusion' || obj.type === 'hideout') && inObj) {
+          isPlayerVisuallyOccluded = true;
+        }
+      }
+    }
+
+    // Atualiza variável global usada na lógica de perseguição
+    isPlayerHidden = isPlayerInHideout;
+
+    // Aplica efeitos visuais no jogador
+   playerEl.style.opacity = isPlayerVisuallyOccluded ? '0.5' : '1';
+   playerEl.style.zIndex = isPlayerVisuallyOccluded ? '4' : Math.floor(player.y);
+
+    // === TRANSPARÊNCIA DO PREDADOR AO PASSAR ATRÁS DE OBSTÁCULOS ===
+    if (predatorEl && window.decorObjects) {
+      let predatorOccluded = false;
+      const predCenter = { x: predator.x, y: predator.y };
+
+      for (const obj of window.decorObjects) {
+        if ((obj.type === 'occlusion' || obj.type === 'hideout') &&
+            predCenter.x >= obj.x &&
+            predCenter.x <= obj.x + obj.width &&
+            predCenter.y >= obj.y &&
+            predCenter.y <= obj.y + obj.height) {
+          predatorOccluded = true;
+          break;
+        }
+      }
+
+      predatorEl.style.opacity = predatorOccluded ? '0.4' : '1';
+      predatorEl.style.zIndex = predatorOccluded ? '4' : Math.floor(predator.y);
+   }
+  }
+
+  // === CONTROLES UNIFICADOS: TECLADO + TOQUE ===
+  let touchStartX = 0, touchStartY = 0;
+
+  function handlePlayerInput(dx, dy) {
+	    if (gameOver || winPhase) return;
+	    const phase = getCurrentPhaseData();
+	    const speed = phase.playerSpeed;
+	    const rect = gameArea.getBoundingClientRect();
+	    const maxX = rect.width - 25;
+	    const maxY = rect.height - 25;
+
+	    let newX = player.x + dx * speed;
+	    let newY = player.y + dy * speed;
+
+	    newX = Math.max(25, Math.min(maxX, newX));
+	    newY = Math.max(25, Math.min(maxY, newY));
+
+	    if (!checkCollisionAt(newX, newY)) {
+	  	  player.x = newX;
+		    player.y = newY;
+		   checkCollisions();
+		   updateDisplay();
+	    }
+  }
+
+// Teclado (só ativo no desktop)
+if (isDesktop()) {
+	document.addEventListener('keydown', (e) => {
+		let dx = 0, dy = 0;
+		if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') dy = -1;
+		if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') dy = 1;
+		if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') dx = -1;
+		if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') dx = 1;
+		handlePlayerInput(dx, dy);
+	});
+}
+
+// Toque (só ativo no mobile)
+if (isMobile()) {
+	gameArea.addEventListener('touchstart', (e) => {
+		e.preventDefault();
+		touchStartX = e.touches[0].clientX;
+		touchStartY = e.touches[0].clientY;
+	}, { passive: false });
+
+	gameArea.addEventListener('touchmove', (e) => {
+		e.preventDefault();
+		const touchX = e.touches[0].clientX;
+		const touchY = e.touches[0].clientY;
+		const dx = touchX - touchStartX;
+		const dy = touchY - touchStartY;
+
+		let inputDx = 0, inputDy = 0;
+		if (Math.abs(dx) > Math.abs(dy)) {
+			inputDx = dx > 0 ? 1 : -1;
+		} else {
+			inputDy = dy > 0 ? 1 : -1;
+		}
+
+		handlePlayerInput(inputDx, inputDy);
+		touchStartX = touchX;
+		touchStartY = touchY;
+	}, { passive: false });
+}
+
+    function movePredator() {
+      if (gameOver || winPhase || !predatorEl) {
+        animationId = requestAnimationFrame(movePredator);
+        return;
+      }
+
+      const phase = getCurrentPhaseData();
+      const rect = gameArea.getBoundingClientRect();
+      const maxX = rect.width - 25;
+      const maxY = rect.height - 25;
+
+      let dx = 0, dy = 0;
+
+      if (isPlayerHidden) {
+        // === PATRULHA ALEATÓRIA ===
+        predator.patrolTimer++;
+        if (predator.patrolTimer > 120) {
+          predator.patrolDirection = {
+            dx: (Math.random() - 0.5) * 2,
+            dy: (Math.random() - 0.5) * 2
+          };
+          predator.patrolTimer = 0;
+        }
+        dx = predator.patrolDirection.dx * phase.predatorSpeed;
+        dy = predator.patrolDirection.dy * phase.predatorSpeed;
+      } else {
+        // === PERSEGUIÇÃO ===
+        const toPlayerX = player.x - predator.x;
+        const toPlayerY = player.y - predator.y;
+        const dist = Math.sqrt(toPlayerX * toPlayerX + toPlayerY * toPlayerY);
+        if (dist > 0) {
+          dx = (toPlayerX / dist) * phase.predatorSpeed;
+          dy = (toPlayerY / dist) * phase.predatorSpeed;
+        }
+      }
+
+      // Encontra a melhor direção livre
+      const result = findBestFreeDirection(dx, dy, phase.predatorSpeed);
+
+      // Aplica o movimento
+      predator.x += result.dx;
+      predator.y += result.dy;
+
+      // Limita aos limites da tela
+      predator.x = Math.max(25, Math.min(maxX, predator.x));
+      predator.y = Math.max(25, Math.min(maxY, predator.y));
+
+      // Verifica captura (só se jogador não estiver escondido)
+      if (!isPlayerHidden) {
+        const distToPlayer = Math.sqrt(
+          Math.pow(player.x - predator.x, 2) + Math.pow(player.y - predator.y, 2)
+        );
+        if (distToPlayer < 40) {
+          perderVida();
+          return;
+        }
+      }
+
+      updateDisplay();
+      animationId = requestAnimationFrame(movePredator);
+    }
+
+    function checkCollisions() {
+      const phase = getCurrentPhaseData();
+      foods.forEach((food, i) => {
+        if (!food.collected) {
+          const dx = player.x - food.x;
+          const dy = player.y - food.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 40) {
+            food.collected = true;
+            collectedCount++;
+            foodEls[i].style.display = 'none';
+            if (collectedCount >= phase.foodCount) {
+              clearInterval(energiaInterval);
+              completedLevels.push({ chain: currentChain, phase: currentPhase });
+              winPhase = true;
+
+              // ✅ Verifica se COMPLETOU a cadeia TERRESTRE (gavião)
+              if (currentChain === 1 && currentPhase === chain1.length - 1) {
+                winTextEl.innerHTML = `
+                  <h3 style="margin:0;color:#2e7d32;">🌍 Conclusão da Cadeia Terrestre!</h3>
+                  <p style="margin-top:10px;">Parabéns! Você concluiu a cadeia alimentar terrestre. Agora você irá se aventurar na cadeia aquática.</p>
+                `;
+                winEl.classList.remove('hidden');
+                proximaFaseEhAquatica = true;
+                document.getElementById('gameArea').classList.add('dimmed');
+                gameArea.classList.add('dimmed');
+              } else {
+                // ✅ EVOLUÇÃO NORMAL: chama nextPhase() para mostrar "Você evoluiu"
+                nextPhase();
+              }
+            }
+          }
+        }
+      });
+    }
+    function perderVida() {
+      vidas--;
+      atualizarVidas();
+      clearInterval(energiaInterval);
+      if (vidas > 0) {
+        setTimeout(() => initPhase(), 1000);
+      } else {
+        gameOver = true;
+        gameOverEl.classList.remove('hidden');
+        statusEl.textContent = 'Você perdeu todas as suas vidas! 😢';
+      }
+    }
+
+    function onGameOverRetry() {
+      if (completedLevels.length === 0) {
+        currentChain = 1;
+        currentPhase = 0;
+        vidas = VIDAS_INICIAIS;
+      } else {
+        const last = completedLevels[completedLevels.length - 1];
+        currentChain = last.chain;
+        currentPhase = last.phase;
+        vidas = VIDAS_INICIAIS;
+      }
+      atualizarVidas();
+      initPhase();
+    }
+
+    function restart() {
+      clearInterval(energiaInterval);
+      currentChain = 1;
+      currentPhase = 0;
+      vidas = VIDAS_INICIAIS;
+      completedLevels = [];
+      atualizarVidas();
+      startScreen.style.display = 'block';
+    }
+
+    function startGame() {
+       document.getElementById('configMenu').classList.add('hidden');
+       document.getElementById('audioPanel').classList.add('hidden');
+       document.getElementById('encyclopediaModal').classList.add('hidden');
+     
+       //  TOCAR SONS
+       playClickSound();      // som de clique ao clicar em "Começar"
+       stopMenuMusic();       // para a música do menu
+       playBackgroundMusic(); // inicia a música do jogo
+
+        //  LÓGICA ORIGINAL DO JOGO
+        startScreen.style.display = 'none';
+        document.getElementById('startScreenBackground').classList.add('hidden');
+        document.getElementById('gameTitle').style.display = 'none';
+        currentChain = 1;
+        currentPhase = 0;
+        vidas = VIDAS_INICIAIS;
+        completedLevels = [];
+        atualizarVidas();
+        initPhase();
+      }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Só agora acessamos os elementos, garantindo que existem
+      const coverScreen = document.getElementById('coverScreen');
+      const startScreen = document.getElementById('startScreen');
+      const coverStartButton = document.getElementById('coverStartButton');
+      const startButton = document.getElementById('startButton');
+
+      // Registra eventos
+      coverStartButton.addEventListener('click', () => {
+        playClickSound(); // ← SOM DE CLIQUE
+        playMenuMusic();  // ← TOCA A MÚSICA DO MENU
+        coverScreen.style.display = 'none';
+        document.getElementById('startScreenBackground').classList.remove('hidden');
+        startScreen.style.display = 'block';
+        document.getElementById('encyclopediaButton').classList.remove('hidden');
+        setTimeout(() => {
+          const cfgBtn = document.getElementById('configButton');
+          cfgBtn.style.display = 'block';
+          cfgBtn.style.pointerEvents = 'auto';
+        }, 300);
+        
+        document.getElementById('configMenu').classList.add('hidden');
+        document.getElementById('audioPanel').classList.add('hidden');
+      });
+
+      startButton.addEventListener('click', startGame);
+
+      // Atualiza vidas e carrega volumes salvos
+      atualizarVidas();
+      loadSavedVolumes();
+    });
+
+    // === SISTEMA DE PERGUNTAS EDUCATIVAS (20 perguntas com 3 alternativas) ===
+const perguntas = [
+  {
+    texto: "O que é cadeia alimentar?",
+    opcoes: [
+      { texto: "A relação de amizade entre os seres vivos", correta: false },
+      { texto: "A sequência de seres vivos ligados pela alimentação", correta: true },
+      { texto: "O conjunto de animais de um mesmo ambiente", correta: false }
+    ],
+    explicacao: "A cadeia alimentar mostra como os seres se alimentam uns dos outros."
+  },
+  {
+    texto: "O que são níveis tróficos?",
+    opcoes: [
+      { texto: "Os diferentes habitats de um ecossistema", correta: false },
+      { texto: "As posições ocupadas pelos seres vivos na cadeia alimentar", correta: true },
+      { texto: "Os tipos de solo onde os seres vivos vivem", correta: false }
+    ],
+    explicacao: "Cada organismo ocupa um nível trófico de acordo com sua função alimentar."
+  },
+  {
+    texto: "Quem ocupa o primeiro nível trófico?",
+    opcoes: [
+      { texto: "Consumidores", correta: false },
+      { texto: "Decompositores", correta: false },
+      { texto: "Produtores", correta: true }
+    ],
+    explicacao: "Produtores, como plantas, estão sempre no início da cadeia."
+  },
+  {
+    texto: "O que são produtores?",
+    opcoes: [
+      { texto: "Seres vivos que se alimentam de outros seres", correta: false },
+      { texto: "Seres vivos que produzem seu próprio alimento", correta: true },
+      { texto: "Seres vivos que se alimentam de matéria em decomposição", correta: false }
+    ],
+    explicacao: "Eles usam a luz solar para fazer fotossíntese."
+  },
+  {
+    texto: "Qual é o principal processo usado pelos produtores para obter energia?",
+    opcoes: [
+      { texto: "Respiração", correta: false },
+      { texto: "Fotossíntese", correta: true },
+      { texto: "Digestão", correta: false }
+    ],
+    explicacao: "A fotossíntese converte luz solar em energia química."
+  },
+  {
+    texto: "O que são consumidores primários?",
+    opcoes: [
+      { texto: "Animais que se alimentam de outros animais", correta: false },
+      { texto: "Animais que se alimentam de produtores", correta: true },
+      { texto: "Seres que produzem seu próprio alimento", correta: false }
+    ],
+    explicacao: "Ex: coelho, gafanhoto, zooplâncton."
+  },
+  {
+    texto: "Um exemplo de consumidor primário é:",
+    opcoes: [
+      { texto: "Leão", correta: false },
+      { texto: "Águia", correta: false },
+      { texto: "Coelho", correta: true }
+    ],
+    explicacao: "O coelho come plantas, então é consumidor primário."
+  },
+  {
+    texto: "O que são consumidores secundários?",
+    opcoes: [
+      { texto: "Animais que comem produtores", correta: false },
+      { texto: "Animais que comem consumidores primários", correta: true },
+      { texto: "Animais que produzem alimento", correta: false }
+    ],
+    explicacao: "Ex: sapo, peixe pequeno."
+  },
+  {
+    texto: "O que é teia alimentar?",
+    opcoes: [
+      { texto: "Uma única cadeia alimentar", correta: false },
+      { texto: "Um conjunto de cadeias alimentares interligadas", correta: true },
+      { texto: "Um tipo de solo", correta: false }
+    ],
+    explicacao: "Na natureza, as cadeias se cruzam formando teias complexas."
+  },
+  {
+    texto: "O que são consumidores terciários?",
+    opcoes: [
+      { texto: "Animais que se alimentam de plantas", correta: false },
+      { texto: "Animais que se alimentam de consumidores secundários", correta: true },
+      { texto: "Seres que realizam fotossíntese", correta: false }
+    ],
+    explicacao: "Ex: cobra, foca."
+  },
+  {
+    texto: "O que são decompositores?",
+    opcoes: [
+      { texto: "Animais carnívoros", correta: false },
+      { texto: "Seres vivos que produzem energia", correta: false },
+      { texto: "Seres vivos que decompõem matéria orgânica", correta: true }
+    ],
+    explicacao: "Fungos e bactérias reciclam matéria morta."
+  },
+  {
+    texto: "Qual é a principal diferença entre cadeia alimentar e teia alimentar?",
+    opcoes: [
+      { texto: "A cadeia alimentar é mais complexa que a teia alimentar", correta: false },
+      { texto: "A teia alimentar representa várias cadeias interligadas", correta: true },
+      { texto: "A teia alimentar não possui produtores", correta: false }
+    ],
+    explicacao: "A teia mostra a realidade mais completa do ecossistema."
+  },
+  {
+    texto: "Qual é a importância dos decompositores na cadeia alimentar?",
+    opcoes: [
+      { texto: "Produzir alimento", correta: false },
+      { texto: "Reciclar nutrientes no ambiente", correta: true },
+      { texto: "Consumir energia solar", correta: false }
+    ],
+    explicacao: "Sem eles, os nutrientes ficariam presos em corpos mortos."
+  },
+  {
+    texto: "O que é fluxo de energia?",
+    opcoes: [
+      { texto: "A passagem de matéria entre os seres vivos", correta: false },
+      { texto: "A circulação da água nos ecossistemas", correta: false },
+      { texto: "A transferência de energia ao longo da cadeia alimentar", correta: true }
+    ],
+    explicacao: "A energia flui do sol → planta → herbívoro → carnívoro."
+  },
+  {
+    texto: "Como o fluxo de energia ocorre na cadeia alimentar?",
+    opcoes: [
+      { texto: "Do consumidor para o produtor", correta: false },
+      { texto: "Do produtor para os consumidores", correta: true },
+      { texto: "Dos decompositores para os produtores", correta: false }
+    ],
+    explicacao: "A energia sempre começa nos produtores."
+  },
+  {
+    texto: "O fluxo de energia na cadeia alimentar é:",
+    opcoes: [
+      { texto: "Cíclico, retorna ao início", correta: false },
+      { texto: "Inexistente", correta: false },
+      { texto: "Unidirecional, não retorna", correta: true }
+    ],
+    explicacao: "A energia entra pelo sol e sai como calor — não volta."
+  },
+  {
+    texto: "O que acontece com a energia ao passar de um nível trófico para outro?",
+    opcoes: [
+      { texto: "Aumenta", correta: false },
+      { texto: "Diminui", correta: true },
+      { texto: "Permanece igual", correta: false }
+    ],
+    explicacao: "Cerca de 90% da energia é perdida como calor!"
+  },
+  {
+    texto: "Por que há menos energia nos níveis tróficos mais altos?",
+    opcoes: [
+      { texto: "Porque os produtores usam toda a energia", correta: false },
+      { texto: "Porque parte da energia é perdida em forma de calor", correta: true },
+      { texto: "Porque os decompositores consomem toda a energia", correta: false }
+    ],
+    explicacao: "Isso limita o número de níveis tróficos (geralmente 3–5)."
+  },
+  {
+    texto: "O que é uma teia alimentar?", // duplicada propositalmente? Mantive conforme seu pedido.
+    opcoes: [
+      { texto: "Uma única sequência alimentar", correta: false },
+      { texto: "Um conjunto de cadeias alimentares interligadas", correta: true },
+      { texto: "Um tipo de habitat", correta: false }
+    ],
+    explicacao: "Representa a complexidade das relações alimentares na natureza."
+  },
+  {
+    texto: "Qual é a principal fonte de energia da maioria das cadeias alimentares?",
+    opcoes: [
+      { texto: "A Lua", correta: false },
+      { texto: "O vento", correta: false },
+      { texto: "O Sol", correta: true }
+    ],
+    explicacao: "Sem o sol, não haveria fotossíntese nem vida animal."
+  }
+];
+
+let perguntasUsadas = [];
+let perguntaAtual = null;
+
+function mostrarPergunta() {
+  // Escolher pergunta não usada
+  const perguntasDisponiveis = perguntas.filter((_, i) => !perguntasUsadas.includes(i));
+  if (perguntasDisponiveis.length === 0) {
+    perguntasUsadas = []; // reinicia se todas foram usadas
+    return mostrarPergunta();
+  }
+  const indice = Math.floor(Math.random() * perguntasDisponiveis.length);
+  const pergunta = perguntasDisponiveis[indice];
+  const indiceOriginal = perguntas.indexOf(pergunta);
+  perguntasUsadas.push(indiceOriginal);
+  perguntaAtual = pergunta;
+
+  gameArea.classList.add('dimmed');
+
+  // Criar tela de pergunta com 3 opções
+  const telaPergunta = document.createElement('div');
+  telaPergunta.id = 'telaPergunta';
+  telaPergunta.innerHTML = `
+    <div style="
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(255, 255, 255, 0.95);
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      z-index: 120;
+      text-align: center;
+      min-width: 320px;
+      max-width: 90%;
+      font-size: 16px;
+      line-height: 1.4;
+    ">
+      <h3 style="margin-bottom: 20px; color: #1976D2;">Pergunta Educativa</h3>
+      <p style="margin-bottom: 20px;">${pergunta.texto}</p>
+      <div id="opcaoA" style="
+        background: #e3f2fd;
+        padding: 12px;
+        margin: 8px 0;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: background 0.2s;
+        border: 2px solid #bbdefb;
+      ">A) ${pergunta.opcoes[0].texto}</div>
+      <div id="opcaoB" style="
+        background: #e3f2fd;
+        padding: 12px;
+        margin: 8px 0;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: background 0.2s;
+        border: 2px solid #bbdefb;
+      ">B) ${pergunta.opcoes[1].texto}</div>
+      <div id="opcaoC" style="
+        background: #e3f2fd;
+        padding: 12px;
+        margin: 8px 0;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: background 0.2s;
+        border: 2px solid #bbdefb;
+      ">C) ${pergunta.opcoes[2].texto}</div>
+      <div id="feedback" style="margin: 15px 0; min-height: 24px; font-weight: bold;"></div>
+      <button id="btnContinuar" style="
+        background: #2196F3;
+        color: white;
+        font-weight: bold;
+        border: none;
+        border-radius: 8px;
+        padding: 12px 24px;
+        font-size: 18px;
+        cursor: pointer;
+        box-shadow: 0 4px 10px rgba(33, 150, 243, 0.4);
+        display: none;
+      ">Continuar</button>
+    </div>
+  `;
+  document.getElementById('gameArea').classList.add('dimmed');
+  document.body.appendChild(telaPergunta);
+
+  // Eventos de clique
+  document.getElementById('opcaoA').addEventListener('click', () => { playClickSound(); responder(0); });
+  document.getElementById('opcaoB').addEventListener('click', () => { playClickSound(); responder(1); });
+  document.getElementById('opcaoC').addEventListener('click', () => { playClickSound(); responder(2); });
+}
+
+function responder(escolha) {
+  const correta = perguntaAtual.opcoes[escolha].correta;
+  const feedbackEl = document.getElementById('feedback');
+  const opcoes = ['opcaoA', 'opcaoB', 'opcaoC'].map(id => document.getElementById(id));
+
+  // Destacar cores
+  opcoes.forEach((el, i) => {
+    el.style.backgroundColor = perguntaAtual.opcoes[i].correta ? '#c8e6c9' : '#ffcdd2';
+  });
+
+  if (correta) {
+    feedbackEl.style.color = '#2e7d32';
+    feedbackEl.textContent = '✅ Resposta correta! Muito bem!';
+  } else {
+    feedbackEl.style.color = '#d32f2f';
+    feedbackEl.textContent = `❌ Resposta incorreta. ${perguntaAtual.explicacao}`;
+  }
+
+  //  ESSENCIAL: mostra o botão "Continuar"
+  const btnContinuar = document.getElementById('btnContinuar');
+  btnContinuar.style.display = 'inline-block';
+
+  btnContinuar.onclick = () => {
+    playClickSound();
+    document.body.removeChild(document.getElementById('telaPergunta'));
+    document.getElementById('gameArea').classList.remove('dimmed');
+    iniciarProximaFase();
+  };
+}
+
+function iniciarProximaFase() {
+  if (proximaFaseEhAquatica) {
+    proximaFaseEhAquatica = false;
+    currentChain = 2;
+    currentPhase = 0;
+  } else {
+    // Avança normalmente
+    currentPhase++;
+  }
+  vidas = VIDAS_INICIAIS;
+  atualizarVidas();
+  initPhase();
+}
+
+function nextPhase() {
+  // Caso especial: conclusão da cadeia TERRESTRE (já tratado em checkCollisions)
+  // Caso: conclusão da cadeia AQUÁTICA → volta para a tela "Explore a Cadeia Alimentar"
+  if (currentChain === 2 && currentPhase === chain2.length - 1) {
+    // Mostra mensagem de conclusão por 3 segundos, depois volta
+    winTextEl.innerHTML = `
+      <h3 style="margin:0;color:#2e7d32;">🌍 Conclusão Total!</h3>
+      <p style="margin-top:10px;">Parabéns! Você completou a cadeia alimentar aquática e viu como a energia flui até os grandes predadores.</p>
+    `;
+    winEl.classList.remove('hidden');
+    gameArea.classList.add('dimmed');
+
+    // Após 3 segundos, volta para a tela inicial de seleção
+    setTimeout(() => {
+      // Esconde elementos do jogo
+      winEl.classList.add('hidden');
+      gameArea.classList.remove('dimmed');
+      gameArea.innerHTML = '';
+      document.getElementById('vidasDisplay').classList.add('hidden');
+      document.getElementById('encyclopediaButton').classList.add('hidden');
+      document.getElementById('energyBarContainer').classList.add('hidden');
+    
+      // Mostra a tela "Explore a Cadeia Alimentar"
+      document.getElementById('startScreen').style.display = 'block';
+      document.getElementById('startScreenBackground').classList.remove('hidden');
+    
+      // Reinicia estado do jogo
+      currentChain = 1;
+      currentPhase = 0;
+      vidas = VIDAS_INICIAIS;
+      completedLevels = [];
+      atualizarVidas();
+    }, 3000); // 3 segundos
+
+    return;
+  }
+
+  // Evolução normal: dentro da mesma cadeia
+  const nextPhaseIndex = currentPhase + 1;
+  const nextPhaseData = currentChain === 1 ? chain1[nextPhaseIndex] : chain2[nextPhaseIndex];
+  const status = nextPhaseData.status;
+  const objetivo = status.split('. ').slice(1).join('. ').trim();
+  const primeiraFrase = status.split('.')[0];
+  let nomePuro = primeiraFrase
+    .replace(/^Você é\s+/, '')
+    .replace(/^você é\s+/, '')
+    .replace(/\s*\(.*\)/, '')
+    .trim();
+
+  const emoji = nextPhaseData.playerEmoji;
+  const info = trophicInfo[emoji];
+  let nomeComInfo = nomePuro;
+  if (info) {
+    nomeComInfo = `${nomePuro} (${info.type} – nível trófico ${info.level})`;
+  }
+
+  let mensagem = `Você virou ${nomeComInfo}.`;
+  if (objetivo) {
+    mensagem += ` ${objetivo}`;
+  }
+  if (!mensagem.endsWith('.')) {
+    mensagem += '.';
+  }
+
+  winTextEl.innerHTML = `
+    <h3 style="margin:0;color:#1976D2;">🎉 Você evoluiu!</h3>
+    <p style="margin-top:10px;">${mensagem}</p>
+  `;
+  winEl.classList.remove('hidden');
+  gameArea.classList.add('dimmed');
+
+  // Remove evento antigo se existir
+  const btnWin = document.getElementById('btnContinuarWin');
+  if (btnWin) {
+    btnWin.onclick = null;
+    btnWin.addEventListener('click', () => {
+      playClickSound();
+      mostrarPergunta();
+    });
+  }
+}
+function rectsOverlap(a, b) {
+  return a.x < b.x + b.width &&
+         a.x + a.width > b.x &&
+         a.y < b.y + b.height &&
+         a.y + a.height > b.y;
+}
+
+function isSolidAt(x, y) {
+  const hitbox = { x: x - 20, y: y - 20, width: 40, height: 40 };
+  if (!window.decorObjects) return false;
+  for (const obj of window.decorObjects) {
+    if (obj.type === 'solid' && rectsOverlap(hitbox, obj)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+// Nova função: encontra a melhor direção livre próxima à direção desejada
+function findBestFreeDirection(targetDx, targetDy, speed, maxAngle = Math.PI / 2, steps = 8) {
+  const baseAngle = Math.atan2(targetDy, targetDx);
+  const angles = [];
+
+  // Gera ângulos ao redor da direção alvo (de -maxAngle a +maxAngle)
+  for (let i = 0; i <= steps; i++) {
+    const angle = baseAngle + (i / steps * 2 - 1) * maxAngle;
+    angles.push(angle);
+  }
+
+  // Testa cada ângulo em ordem de proximidade com a direção original
+  for (const angle of angles) {
+    const dx = Math.cos(angle) * speed;
+    const dy = Math.sin(angle) * speed;
+    if (!isSolidAt(predator.x + dx, predator.y + dy)) {
+      return { dx, dy, angle };
+    }
+  }
+
+  // Se tudo falhar, tenta qualquer direção (360°)
+  for (let i = 0; i < 16; i++) {
+    const angle = (i / 16) * Math.PI * 2;
+    const dx = Math.cos(angle) * speed;
+    const dy = Math.sin(angle) * speed;
+    if (!isSolidAt(predator.x + dx, predator.y + dy)) {
+      return { dx, dy, angle };
+    }
+  }
+
+  // Nenhuma direção livre → não move
+  return { dx: 0, dy: 0, angle: baseAngle };
+}
+function findFreeDirection(baseDx, baseDy, speed, attempts = 8) {
+  // Tenta a direção original primeiro
+  if (!isSolidAt(predator.x + baseDx * speed, predator.y + baseDy * speed)) {
+    return { dx: baseDx, dy: baseDy };
+  }
+
+  // Se estiver bloqueado, tenta pequenas rotações ao redor
+  const angles = [];
+  for (let i = 0; i < attempts; i++) {
+    const angle = (i / attempts) * Math.PI * 2;
+    angles.push(angle);
+  }
+  // Embaralha para evitar padrão
+  angles.sort(() => Math.random() - 0.5);
+
+  for (const angle of angles) {
+    const dx = Math.cos(angle);
+    const dy = Math.sin(angle);
+    if (!isSolidAt(predator.x + dx * speed, predator.y + dy * speed)) {
+      return { dx, dy };
+    }
+  }
+
+  // Se tudo falhar, retorna a direção original (mesmo que empurre contra a parede)
+  return { dx: baseDx, dy: baseDy };
+}
+
+// === FUNÇÕES DE PATHFINDING SIMPLES ===
+
+function isSolidAt(x, y) {
+  const hitbox = { x: x - 20, y: y - 20, width: 40, height: 40 };
+  if (!window.decorObjects) return false;
+  for (const obj of window.decorObjects) {
+    if (obj.type === 'solid' && rectsOverlap(hitbox, obj)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+// Gera ângulos próximos à direção alvo (±90°)
+function generateCandidateAngles(targetAngle, steps = 8) {
+  const angles = [];
+  const maxOffset = Math.PI / 2; // 90 graus
+  for (let i = 0; i <= steps; i++) {
+    const offset = (i / steps * 2 - 1) * maxOffset;
+    angles.push(targetAngle + offset);
+  }
+  return angles;
+}
+
+// Encontra a melhor direção livre próxima ao alvo
+function findBestFreeDirection(targetDx, targetDy, speed) {
+  const targetAngle = Math.atan2(targetDy, targetDx);
+  const candidateAngles = generateCandidateAngles(targetAngle);
+
+  // Testa primeiro a direção exata
+  if (!isSolidAt(predator.x + targetDx, predator.y + targetDy)) {
+    return { dx: targetDx, dy: targetDy };
+  }
+
+  // Testa ângulos alternativos
+  for (const angle of candidateAngles) {
+    const dx = Math.cos(angle) * speed;
+    const dy = Math.sin(angle) * speed;
+    if (!isSolidAt(predator.x + dx, predator.y + dy)) {
+      return { dx, dy };
+    }
+  }
+
+  // Se tudo falhar, tenta qualquer direção (360°)
+  for (let i = 0; i < 16; i++) {
+    const angle = (i / 16) * Math.PI * 2;
+    const dx = Math.cos(angle) * speed;
+    const dy = Math.sin(angle) * speed;
+    if (!isSolidAt(predator.x + dx, predator.y + dy)) {
+      return { dx, dy };
+    }
+  }
+
+  // Nenhuma saída → não se move
+  return { dx: 0, dy: 0 };
+}
+
+function checkCollisionAt(x, y) {
+  const playerHitbox = {
+    x: x - 20,
+    y: y - 20,
+    width: 40,
+    height: 40
+  };
+  if (!window.decorObjects) return false;
+  for (const obj of window.decorObjects) {
+    if (obj.type === 'solid' && rectsOverlap(playerHitbox, obj)) {
+      return true; // só bloqueia 'solid'
+    }
+  }
+  return false;
+}
+
+// Fecha o modal ao clicar no "X"
+document.querySelector('.close-btn').addEventListener('click', () => {
+  document.getElementById('encyclopediaModal').classList.add('hidden');
+});
+
+// Fecha ao clicar fora do conteúdo
+document.getElementById('encyclopediaModal').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('encyclopediaModal')) {
+    document.getElementById('encyclopediaModal').classList.add('hidden');
+  }
+});
+
+// === ÁUDIO E CONTROLES ===
+const bgMusic = document.getElementById('backgroundMusic');
+const settingsBtn = document.getElementById('settingsButton');
+const settingsPanel = document.getElementById('settingsPanel');
+const volumeControl = document.getElementById('volumeControl');
+const closeSettingsBtn = document.getElementById('closeSettings');
+const creditsBtn = document.getElementById('creditsButton');
+
+// Inicializa volume
+if (bgMusic) {
+  bgMusic.volume = 0.7;
+}
+
+// Função para tocar som de clique
+function playClickSound() {
+  const clickSound = document.getElementById('clickSound');
+  if (clickSound) {
+    clickSound.currentTime = 0; // Reinicia caso esteja tocando
+    clickSound.play().catch(e => console.log("Som de clique bloqueado:", e));
+  }
+}
+
+// Função para tocar música do menu
+function playMenuMusic() {
+  const menuMusic = document.getElementById('menuMusic');
+  if (menuMusic) {
+    menuMusic.play().catch(e => console.log("Música do menu bloqueada até interação:", e));
+  }
+}
+
+// Função para parar música do menu
+function stopMenuMusic() {
+  const menuMusic = document.getElementById('menuMusic');
+  if (menuMusic) {
+    menuMusic.pause();
+    menuMusic.currentTime = 0;
+  }
+}
+
+// Armazena volumes atuais
+let volumes = {
+  game: 70,
+  menu: 70,
+  click: 80
+};
+
+// Aplica volume aos elementos de áudio
+function applyVolumes() {
+  const bgMusic = document.getElementById('backgroundMusic');
+  const menuMusic = document.getElementById('menuMusic');
+  const clickSound = document.getElementById('clickSound');
+
+  if (bgMusic) bgMusic.volume = volumes.game / 100;
+  if (menuMusic) menuMusic.volume = volumes.menu / 100;
+  if (clickSound) clickSound.volume = volumes.click / 100;
+
+  // Salva nos localStorage
+  localStorage.setItem('gameVolumes', JSON.stringify(volumes));
+}
+
+// Carrega volumes salvos
+function loadSavedVolumes() {
+  const saved = localStorage.getItem('gameVolumes');
+  if (saved) {
+    volumes = JSON.parse(saved);
+    document.getElementById('volGame').value = volumes.game;
+    document.getElementById('volMenu').value = volumes.menu;
+    document.getElementById('volClick').value = volumes.click;
+  }
+  applyVolumes();
+}
+
+// Atualiza volume por tipo
+function updateVolume(type, delta) {
+  volumes[type] = Math.max(0, Math.min(100, volumes[type] + delta));
+  document.getElementById(`vol${type.charAt(0).toUpperCase() + type.slice(1)}`).value = volumes[type];
+  applyVolumes();
+}
+// Função para tocar música (só após interação)
+function playBackgroundMusic() {
+  if (bgMusic) {
+    bgMusic.play().catch(e => console.log("Áudio bloqueado até interação:", e));
+  }
+}
+
+// Eventos de Configurações
+if (settingsBtn && settingsPanel && closeSettingsBtn && volumeControl) {
+  settingsBtn.addEventListener('click', () => {
+  playClickSound();
+  settingsPanel.classList.toggle('hidden');
+});
+  closeSettingsBtn.addEventListener('click', () => {
+  playClickSound();
+  settingsPanel.classList.add('hidden');
+});
+  volumeControl.addEventListener('input', () => {
+    if (bgMusic) bgMusic.volume = volumeControl.value;
+  });
+}
+
+// Evento de Créditos
+if (creditsBtn) {
+  creditsBtn.addEventListener('click', () => {
+  playClickSound();
+  document.getElementById('creditsModal').classList.remove('hidden');
+});
+}
+
+// Fecha modal ao clicar fora
+document.getElementById('creditsModal').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('creditsModal')) {
+    document.getElementById('creditsModal').classList.add('hidden');
+  }
+});
+  </script>
+</body>
+</html>
